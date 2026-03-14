@@ -58,6 +58,19 @@ video{
   z-index:10;
 }
 
+#secondText3{
+  position:absolute;
+  top:60px;
+  left:50px;
+  color:#fff;
+   background:gold;
+  font-family: Arial;
+  font-size: 12px;
+  padding: 4px 9px;
+  border-radius: 0px;
+  z-index:10;
+}
+  
 #logo1{
   position:absolute;
   top:15px;
@@ -167,6 +180,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const secondText2 = document.getElementById("secondText2");
   const logo1 = document.getElementById("logo1");
   const logo2 = document.getElementById("logo2");
+  const logo3 = document.getElementById("logo3");
   const clockTime = document.getElementById("clockTime");
   const clockBox = document.getElementById("clockBox");
   const marqueeText = document.getElementById("marqueeText");
@@ -182,6 +196,7 @@ document.addEventListener("DOMContentLoaded", () => {
      title: "Ex-Ex Lovers",
     secondText: "Parental Guidance",
    secondText2: "NOW:",
+   secondText3: "TEST BROADCAST",
    logo1: "https://i.imgur.com/WJ7zMDL.png"
     },
 
@@ -195,6 +210,7 @@ document.addEventListener("DOMContentLoaded", () => {
      title: "Green Bones",
     secondText: "Parental Guidance",
        secondText2: "NOW:",
+       secondText3: "TEST BROADCAST",
     logo1: "https://i.imgur.com/WJ7zMDL.png"
     }
 
@@ -211,6 +227,8 @@ document.addEventListener("DOMContentLoaded", () => {
     logo1.style.display = item.logo1 ? "block" : "none";
     logo2.src = item.logo2 || "";
     logo2.style.display = item.logo2 ? "block" : "none";
+     logo3.src = item.logo3 || "";
+    logo3.style.display = item.logo3 ? "block" : "none";
     clockBox.style.display = item.showClock ? "block" : "none";
     marqueeContent.textContent = item.marquee || "";
     marqueeText.style.display = item.marquee ? "block" : "none";
