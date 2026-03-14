@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>IPTV Player</title>
+<style>
+html, body{
+  margin:0;
+  padding:0;
+  height:100%;
+  width:100%;
+  background:black;
+  overflow:hidden;
+}
+video{
+  width:100%;
+  height:100%;
+  object-fit: fill;
+  background:black;
+}
+
+/* TITLE OVERLAY */
+#titleOverlay{
+  position:absolute;
+  top:30px;
+  left:95px;
+  color:#fff;
+   background:violet;
+  font-family: Arial, sans-serif;
+  font-size:12px;
+  padding: 6px 12px;
+  border-radius: 3px;
+  z-index: 10;
+}
+
+#secondText{
+  position:absolute;
+  bottom:50px;
+  right:50px;
+  color:#fff;
+  font-family: Arial, sans-serif;
+  font-size: 18px;
+  padding: 8px 14px;
+  border-radius: 6px;
+  z-index:10;
+}
+
+#secondText2{
+  position:absolute;
+  top:30px;
+  left:50px;
+  color:#fff;
+   background:blue;
+  font-family: Arial;
+  font-size: 12px;
+  padding: 6px 9px;
+  border-radius: 0px;
+  z-index:10;
+}
+
+#logo1{
+  position:absolute;
+  top:15px;
+  right:50px;
+  width:110px;
+  height:90px;
+  z-index:10;
+  pointer-events:none;
+}
+
+#logo2{
+  position:absolute;
+  top:20px;
+  left:20px;
+  width:80px;
+  height:auto;
+  z-index:10;
+  pointer-events:none;
+}
+
+#playlistPanel{
+  position:absolute;
+  top:0;
+  left:0;
+  width:260px;
+  height:100%;
+  background:rgba(0,0,0,0.75);
+  overflow-y:auto;
+  z-index:20;
+  padding-top:20px;
+  display:none;
+}
+
+.playItem{
+  padding:12px 15px;
+  color:#fff;
+  font-family:Arial;
+  font-size:15px;
+  border-bottom:1px solid rgba(255,255,255,0.15);
+  cursor:pointer;
+}
+
+.playItem:hover{
+  background:rgba(255,255,255,0.1);
+}
+
+#marqueeText{
+  position:absolute;
+  bottom:0;
+  left:0;
+  width:100%;
+  overflow:hidden;
+  background:blue;
+  color:#fff;
+  font-family:Arial;
+  font-size:18px;
+  padding:8px 0;
+  z-index:15;
+  display:none;
+}
+
+#marqueeContent{
+  display:inline-block;
+  padding-left:100%;
+  white-space:nowrap;
+  animation:scrollText 80s linear infinite;
+}
+
+@keyframes scrollText{
+  from{ transform:translateX(0); }
+  to{ transform:translateX(-100%); }
+}
+
+#clockBox{
+  position:absolute;
+  bottom:0px;
+  left:6px;
+  background:black;
+  color:white;
+  font-family:Arial;
+  font-size:18px;
+  padding:10px 12px;
+  border-radius:4px;
+  z-index:15;
+}
+</style>
+</head>
+<body>
+
+<video id="video" autoplay playsinline></video>
+<div id="marqueeText">
+  <span id="marqueeContent"></span>
+</div>
+<div id="playlistPanel"></div>
+<div id="titleOverlay"></div>
+<div id="secondText"></div>
+<div id="secondText2"></div>
+<div id="clockBox"><span id="clockTime"></span></div>
+<img id="logo1">
+<img id="logo2">
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const video = document.getElementById("video");
+  const titleOverlay = document.getElementById("titleOverlay");
+  const secondText = document.getElementById("secondText");
+  const secondText2 = document.getElementById("secondText2");
+  const logo1 = document.getElementById("logo1");
+  const logo2 = document.getElementById("logo2");
+  const clockTime = document.getElementById("clockTime");
+  const clockBox = document.getElementById("clockBox");
+  const marqueeText = document.getElementById("marqueeText");
+  const marqueeContent = document.getElementById("marqueeContent");
+  const playlistPanel = document.getElementById("playlistPanel");
+
+  let currentIndex = 0;
+
+  const playlist = [
+   {
+      type: "MP4",
+      manifest: "https://ia800409.us.archive.org/10/items/venom-720-p/Venom_720P.mp4",
+     title: "Venom",
+    secondText: "Parental Guidance",
+      secondText2: "NOW:",
+    logo1: "https://i.imgur.com/tRyRFmM.png"
+    },
+
+ /* COMMERCIALS1 */
+    {
+type: "MP4",
+manifest: "https://ia600908.us.archive.org/9/items/zp_20260311/1NO%20SOUNDS.ia.mp4"
+},
+{
+type: "MP4",
+manifest: "https://ia800908.us.archive.org/9/items/zp_20260311/zp.ia.mp4"
+},
+
+
+/* MOVIES2 */
+ {
+      type: "MP4",
+      manifest: "https://ia803207.us.archive.org/25/items/jumanji-welcome-to-the-jungle-720-p/Jumanji_Welcome_to_the_Jungle_720P.mp4",
+     title: "Jumanji Welcome to the Jungle",
+    secondText: "Parental Guidance",
+    secondText2: "NOW:",
+    logo1: "https://i.imgur.com/tRyRFmM.png"
+    },
+
+ /* COMMERCIALS2 */
+    {
+type: "MP4",
+manifest: "https://ia600908.us.archive.org/9/items/zp_20260311/1NO%20SOUNDS.ia.mp4"
+},
+{
+type: "MP4",
+manifest: "https://ia800908.us.archive.org/9/items/zp_20260311/zp.ia.mp4"
+},
+
+
+/* MOVIES3 */
+     {
+      type: "MP4",
+      manifest: "https://ia600503.us.archive.org/28/items/journey-2-the-mysterious-island-720-p/Journey_2_The_Mysterious_Island_720P.mp4",
+     title: "Journey2: The Mysterious Island",
+    secondText: "Parental Guidance",
+        secondText2: "NOW:",
+    logo1: "https://i.imgur.com/tRyRFmM.png"
+    },
+
+ /* COMMERCIALS3 */
+    {
+type: "MP4",
+manifest: "https://ia600908.us.archive.org/9/items/zp_20260311/1NO%20SOUNDS.ia.mp4"
+},
+{
+type: "MP4",
+manifest: "https://ia800908.us.archive.org/9/items/zp_20260311/zp.ia.mp4"
+},
+
+
+/* MOVIES4 */
+{
+      type: "MP4",
+      manifest: "https://ia800604.us.archive.org/12/items/men-are-from-qc-women-are-from-alabang-1080-p/Ex_Ex_Lovers_1080P.ia.mp4",
+     title: "Ex-Ex Lovers",
+    secondText: "Parental Guidance",
+   secondText2: "NOW:",
+   logo1: "https://i.imgur.com/tRyRFmM.png"
+    },
+
+ /* COMMERCIALS4 */
+    {
+type: "MP4",
+manifest: "https://ia600908.us.archive.org/9/items/zp_20260311/1NO%20SOUNDS.ia.mp4"
+},
+{
+type: "MP4",
+manifest: "https://ia800908.us.archive.org/9/items/zp_20260311/zp.ia.mp4"
+},
+
+
+/* MOVIES5 */
+    {
+      type: "MP4",
+      manifest: "https://ia600604.us.archive.org/12/items/men-are-from-qc-women-are-from-alabang-1080-p/Green_Bones_1080P.ia.mp4",
+     title: "Green Bones",
+    secondText: "Parental Guidance",
+       secondText2: "NOW:",
+    logo1: "https://i.imgur.com/tRyRFmM.png"
+    },
+
+ /* COMMERCIALS5 */
+    {
+type: "MP4",
+manifest: "https://ia600908.us.archive.org/9/items/zp_20260311/1NO%20SOUNDS.ia.mp4"
+},
+{
+type: "MP4",
+manifest: "https://ia800908.us.archive.org/9/items/zp_20260311/zp.ia.mp4"
+},
+
+
+
+/* MOVIES6 */
+    {
+      type: "MP4",
+      manifest: "https://ia903209.us.archive.org/30/items/jaws.-1975.-internal.-hdr-10-plus.-2160p.-uhd.-blu-ray.-x-265-iamable_202602/Finding%20Dory%20%282016%29.mp4",
+     title: "Finding Dory",
+    secondText: "Parental Guidance", 
+       secondText2: "NOW:",
+      logo1: "https://i.imgur.com/tRyRFmM.png"
+    },
+
+ /* COMMERCIALS6 */
+    {
+type: "MP4",
+manifest: "https://ia600908.us.archive.org/9/items/zp_20260311/1NO%20SOUNDS.ia.mp4"
+},
+{
+type: "MP4",
+manifest: "https://ia800908.us.archive.org/9/items/zp_20260311/zp.ia.mp4"
+},
+
+
+/* MOVIES7 */
+      {
+      type: "MP4",
+      manifest: "https://ia903209.us.archive.org/30/items/jaws.-1975.-internal.-hdr-10-plus.-2160p.-uhd.-blu-ray.-x-265-iamable_202602/Five%20Nights%20at%20Freddy%27s%20%282023%29.mp4",
+     title: "Five Nights at Freddy",
+    secondText: "Parental Guidance",
+         secondText2: "NOW:",
+    logo1: "https://i.imgur.com/tRyRFmM.png"
+    },
+
+ /* COMMERCIALS7 */
+    {
+type: "MP4",
+manifest: "https://ia600908.us.archive.org/9/items/zp_20260311/1NO%20SOUNDS.ia.mp4"
+},
+{
+type: "MP4",
+manifest: "https://ia800908.us.archive.org/9/items/zp_20260311/zp.ia.mp4"
+},
+
+
+
+/* MOVIES8 */
+      {
+      type: "MP4",
+      manifest: "https://ia803209.us.archive.org/30/items/jaws.-1975.-internal.-hdr-10-plus.-2160p.-uhd.-blu-ray.-x-265-iamable_202602/Girl%20in%20the%20Basement%20%282021%29.mp4",
+     title: "Girl in the Basement",
+    secondText: "Parental Guidance",
+         secondText2: "NOW:",
+    logo1: "https://i.imgur.com/tRyRFmM.png"
+    },
+
+ /* COMMERCIALS8 */
+    {
+type: "MP4",
+manifest: "https://ia600908.us.archive.org/9/items/zp_20260311/1NO%20SOUNDS.ia.mp4"
+},
+{
+type: "MP4",
+manifest: "https://ia800908.us.archive.org/9/items/zp_20260311/zp.ia.mp4"
+},
+
+
+
+/* MOVIES9 */
+  {
+      type: "MP4",
+      manifest: "https://ia803209.us.archive.org/30/items/jaws.-1975.-internal.-hdr-10-plus.-2160p.-uhd.-blu-ray.-x-265-iamable_202602/Godzilla%20vs.%20Kong%20%282021%29.mp4",
+     title: "Godzilla vs. Kong",
+    secondText: "Parental Guidance",
+     secondText2: "NOW:",
+    logo1: "https://i.imgur.com/tRyRFmM.png"
+    },
+
+ /* COMMERCIALS9 */
+    {
+type: "MP4",
+manifest: "https://ia600908.us.archive.org/9/items/zp_20260311/1NO%20SOUNDS.ia.mp4"
+},
+{
+type: "MP4",
+manifest: "https://ia800908.us.archive.org/9/items/zp_20260311/zp.ia.mp4"
+},
+
+
+/* MOVIES10 */
+     {
+      type: "MP4",
+      manifest: "https://ia803209.us.archive.org/30/items/jaws.-1975.-internal.-hdr-10-plus.-2160p.-uhd.-blu-ray.-x-265-iamable_202602/Grown%20Ups%20%282010%29.mp4",
+     title: "Grown Ups",
+    secondText: "Parental Guidance",
+        secondText2: "NOW:",
+    logo1: "https://i.imgur.com/tRyRFmM.png"
+    },
+
+ /* COMMERCIALS10 */
+    {
+type: "MP4",
+manifest: "https://ia600908.us.archive.org/9/items/zp_20260311/1NO%20SOUNDS.ia.mp4"
+},
+{
+type: "MP4",
+manifest: "https://ia800908.us.archive.org/9/items/zp_20260311/zp.ia.mp4"
+},
+
+
+
+/* MOVIES11 */
+ {
+      type: "MP4",
+      manifest: "https://ia903209.us.archive.org/30/items/jaws.-1975.-internal.-hdr-10-plus.-2160p.-uhd.-blu-ray.-x-265-iamable_202602/Harry%20Potter%20and%20the%20Chamber%20of%20Secrets%20%282002%29.mp4",
+     title: "Harry Potter and the Chamber of Secrets",
+    secondText: "Parental Guidance",
+    secondText2: "NOW:",
+    logo1: "https://i.imgur.com/tRyRFmM.png"
+    },
+
+ /* COMMERCIALS11 */
+    {
+type: "MP4",
+manifest: "https://ia600908.us.archive.org/9/items/zp_20260311/1NO%20SOUNDS.ia.mp4"
+},
+{
+type: "MP4",
+manifest: "https://ia800908.us.archive.org/9/items/zp_20260311/zp.ia.mp4"
+},
+
+/* MOVIES12 */
+
+     {
+      type: "MP4",
+      manifest: "https://ia803209.us.archive.org/30/items/jaws.-1975.-internal.-hdr-10-plus.-2160p.-uhd.-blu-ray.-x-265-iamable_202602/Godzilla%20x%20Kong_%20The%20New%20Empire%20%282024%29.mp4",
+     title: "Godzilla x Kong The New Empire",
+    secondText: "Parental Guidance",
+        secondText2: "NOW:",
+    logo1: "https://i.imgur.com/tRyRFmM.png"
+    },
+
+ /* COMMERCIALS12 */
+    {
+type: "MP4",
+manifest: "https://ia600908.us.archive.org/9/items/zp_20260311/1NO%20SOUNDS.ia.mp4"
+},
+{
+type: "MP4",
+manifest: "https://ia800908.us.archive.org/9/items/zp_20260311/zp.ia.mp4"
+}
+    
+
+  ];
+
+  function updateOverlays(item){
+    titleOverlay.textContent = item.title || "";
+    titleOverlay.style.display = item.title ? "block" : "none";
+    secondText.textContent = item.secondText || "";
+    secondText.style.display = item.secondText ? "block" : "none";
+    secondText2.textContent = item.secondText2 || "";
+    secondText2.style.display = item.secondText2 ? "block" : "none";
+    logo1.src = item.logo1 || "";
+    logo1.style.display = item.logo1 ? "block" : "none";
+    logo2.src = item.logo2 || "";
+    logo2.style.display = item.logo2 ? "block" : "none";
+    clockBox.style.display = item.showClock ? "block" : "none";
+    marqueeContent.textContent = item.marquee || "";
+    marqueeText.style.display = item.marquee ? "block" : "none";
+  }
+
+  // Updated play function with optional resume
+  async function playMP4(url, item, resume = true){
+    updateOverlays(item);
+    video.src = url;
+    video.load();
+
+    const resumeKey = "video-resume-" + currentIndex;
+    if(resume){
+      const savedTime = localStorage.getItem(resumeKey);
+      if(savedTime) video.currentTime = savedTime;
+    } else {
+      video.currentTime = 0; // start from beginning
+    }
+
+    try { await video.play(); } catch(e){
+      setTimeout(()=> video.play().catch(()=>{}), 3000);
+    }
+  }
+
+  function buildPlaylistUI(){
+    playlistPanel.innerHTML = "";
+    playlist.forEach((item,index)=>{
+      const div = document.createElement("div");
+      div.className = "playItem";
+      div.textContent = item.title || "Video " + (index+1);
+      div.onclick = async () => {
+        currentIndex = index;
+        await playMP4(item.manifest,item,false); // start from 0 when clicked
+        playlistPanel.style.display = "none";
+      };
+      playlistPanel.appendChild(div);
+    });
+  }
+
+  // auto-next: always start from 0
+  async function playNext(){
+    const item = playlist[currentIndex];
+    await playMP4(item.manifest,item,false);
+    video.onended = () => {
+      currentIndex = (currentIndex + 1) % playlist.length;
+      playNext();
+    };
+  }
+
+  // Save current video time for resume
+  video.addEventListener("timeupdate", () => {
+    localStorage.setItem("video-resume-" + currentIndex, video.currentTime);
+  });
+
+  video.addEventListener("stalled", () => setTimeout(()=> video.play().catch(()=>{}), 3000));
+  video.addEventListener("waiting", () => setTimeout(()=> video.play().catch(()=>{}), 3000));
+
+  // Show/hide playlist
+  let playlistVisible = true;
+  video.addEventListener("click", () => {
+    playlistPanel.style.display = playlistVisible ? "none" : "block";
+    playlistVisible = !playlistVisible;
+  });
+
+  video.requestFullscreen?.();
+  buildPlaylistUI();
+  playNext();
+
+  // Clock
+  function updateClock(){
+    const now = new Date();
+    let hours = now.getHours();
+    let minutes = String(now.getMinutes()).padStart(2,"0");
+    let ampm = hours >= 12 ? "PM" : "AM";
+    hours = hours % 12 || 12;
+    clockTime.textContent = hours + ":" + minutes + " " + ampm;
+  }
+  setInterval(updateClock,60000);
+  updateClock();
+
+  // Handle offline/online
+  let internetTimer = null;
+  window.addEventListener("offline", () => { internetTimer = setTimeout(()=> location.reload(), 30000); });
+  window.addEventListener("online", () => { if(internetTimer){ clearTimeout(internetTimer); internetTimer=null; } playNext(); });
+});
+
+// Disable right-click & shortcut keys
+document.addEventListener("contextmenu", e => e.preventDefault());
+document.addEventListener("keydown", e => {
+  if(e.ctrlKey && e.key.toLowerCase()==="u") e.preventDefault();
+  if(e.ctrlKey && e.shiftKey && e.key.toLowerCase()==="c") e.preventDefault();
+});
+</script>
+
+<script disable-devtool-auto src="https://cdn.jsdelivr.net/npm/disable-devtool"></script>
+</body>
+</html>
