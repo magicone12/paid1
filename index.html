@@ -63,7 +63,6 @@ video{
   top:60px;
   left:50px;
   color:#fff;
-   background:gold;
   font-family: Arial;
   font-size: 12px;
   padding: 4px 9px;
@@ -201,9 +200,6 @@ document.addEventListener("DOMContentLoaded", () => {
    logo1: "https://i.imgur.com/WJ7zMDL.png"
     },
 
-
-
-
 /* MOVIES5 */
     {
       type: "MP4",
@@ -224,12 +220,12 @@ document.addEventListener("DOMContentLoaded", () => {
     secondText.style.display = item.secondText ? "block" : "none";
     secondText2.textContent = item.secondText2 || "";
     secondText2.style.display = item.secondText2 ? "block" : "none";
+    secondText3.textContent = item.secondText3 || "";
+    secondText3.style.display = item.secondText3 ? "block" : "none";
     logo1.src = item.logo1 || "";
     logo1.style.display = item.logo1 ? "block" : "none";
     logo2.src = item.logo2 || "";
     logo2.style.display = item.logo2 ? "block" : "none";
-     logo3.src = item.logo3 || "";
-    logo3.style.display = item.logo3 ? "block" : "none";
     clockBox.style.display = item.showClock ? "block" : "none";
     marqueeContent.textContent = item.marquee || "";
     marqueeText.style.display = item.marquee ? "block" : "none";
